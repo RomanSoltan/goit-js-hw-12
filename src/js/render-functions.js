@@ -1,3 +1,9 @@
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
+
+const loadMoreBtn = document.querySelector('.load-more-js');
+const loader = document.querySelector('.loader-js');
+
 export function createMarkup(arr) {
   return arr
     .map(
@@ -38,3 +44,34 @@ export function createMarkup(arr) {
     .join('');
 }
 
+export function showMessage(message) {
+  iziToast.show({
+    message,
+    position: 'topRight',
+    closeOnClick: true,
+    progressBar: false,
+    messageColor: 'white',
+    backgroundColor: '#ef4040',
+  });
+}
+
+export function showErr(error) {
+  iziToast.show({
+    title: 'X',
+    message: `${error}`,
+    position: 'center',
+    color: 'red',
+  });
+}
+
+export function showLoadMoreBtn() {
+  loadMoreBtn.classList.replace('load-more-hidden', 'load-more');
+}
+
+export function hideLoadMoreBtn() {
+  loadMoreBtn.classList.replace('load-more', 'load-more-hidden');
+}
+
+export function loaderAnimation(str) {
+  loader.style.display = `${str}`;
+}

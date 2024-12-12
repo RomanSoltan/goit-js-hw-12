@@ -1,12 +1,16 @@
-import { getFetchImg } from './js/pixabay-api';
-import { createMarkup } from './js/render-functions';
-
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const loader = document.querySelector('.loader-js');
+import { getApiImg } from './js/pixabay-api';
+import {
+  createMarkup,
+  showMessage,
+  showErr,
+  showLoadMoreBtn,
+  hideLoadMoreBtn,
+  loaderAnimation,
+} from './js/render-functions';
+
 const form = document.querySelector('.form-js');
 const input = document.querySelector('.input-js');
 const gallery = document.querySelector('.gallery-js');
@@ -30,97 +34,66 @@ async function handlerSubmit(event) {
   page = 1;
   gallery.innerHTML = '';
   searchQuery = input.value.trim();
+  hideLoadMoreBtn();
 
   if (!searchQuery) {
-    iziToast.show({
-      message: 'Sorry, the request cannot be empty. Please try again...',
-      position: 'topRight',
-      closeOnClick: true,
-      progressBar: false,
-      messageColor: 'white',
-      backgroundColor: '#ef4040',
-    });
+    showMessage('Sorry, the request cannot be empty. Please try again...');
     return;
   }
 
-  loader.style.display = 'block';
+  loaderAnimation('block');
 
   try {
-    const data = await getFetchImg(searchQuery, page);
+    const data = await getApiImg(searchQuery, page);
 
     if (!data.hits.length) {
-      iziToast.show({
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
-        position: 'topRight',
-        closeOnClick: true,
-        progressBar: false,
-        messageColor: 'white',
-        backgroundColor: '#ef4040',
-      });
+      showMessage(
+        'Sorry, there are no images matching your search query. Please try again!'
+      );
       return;
     }
-    
+
     gallery.insertAdjacentHTML('beforeend', createMarkup(data.hits));
     lightBox.refresh();
     if (page < data.totalHits / 15) {
-      loadMoreBtn.classList.replace('load-more-hidden', 'load-more');
+      showLoadMoreBtn();
     }
   } catch (error) {
-    iziToast.show({
-      title: 'X',
-      message: `${error.message}`,
-      position: 'center',
-      color: 'red',
-    });
+    showErr(error.message);
   } finally {
     event.target.reset();
-    loader.style.display = 'none';
+    loaderAnimation('none');
   }
 }
 
 async function onLoadMore() {
   page++;
   loadMoreBtn.disabled = true;
-  loadMoreBtn.classList.replace("load-more", "load-more-hidden");
-  loader.style.display = 'block';
+  hideLoadMoreBtn();
+  loaderAnimation('block');
 
   try {
-  
-    const data = await getFetchImg(searchQuery, page);
-    gallery.insertAdjacentHTML("beforeend", createMarkup(data.hits));
+    const data = await getApiImg(searchQuery, page);
+    gallery.insertAdjacentHTML('beforeend', createMarkup(data.hits));
     lightBox.refresh();
 
     if (page >= data.totalHits / 15) {
-      loadMoreBtn.classList.replace("load-more", "load-more-hidden");
-      iziToast.show({
-        message:
-          "We're sorry, but you've reached the end of search results.",
-        position: 'topRight',
-        closeOnClick: true,
-        progressBar: false,
-        messageColor: 'white',
-        backgroundColor: '#ef4040',
-      });
+      hideLoadMoreBtn();
+      showMessage("We're sorry, but you've reached the end of search results.");
     }
 
-    const card = document.querySelector(".gallery-item");
+    const card = document.querySelector('.gallery-item');
     const cardHeight = card.getBoundingClientRect().height;
     window.scrollBy({
       left: 0,
       top: cardHeight * 2,
-      behavior: "smooth"
-    })
-  } catch(error) {
-    iziToast.show({
-      title: 'X',
-      message: `${error.message}`,
-      position: 'center',
-      color: 'red',
-    })
+      behavior: 'smooth',
+    });
+  } catch (error) {
+    showErr(error.message);
   } finally {
     loadMoreBtn.disabled = false;
-    loadMoreBtn.classList.replace('load-more-hidden', 'load-more')
-    loader.style.display = 'none';
+    showLoadMoreBtn();
+    loaderAnimation('none');
   }
 }
