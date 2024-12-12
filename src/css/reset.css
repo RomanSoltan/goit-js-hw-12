@@ -25,6 +25,12 @@ a {
 
 button {
   cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input {
+  outline: transparent;
 }
 
 img {
