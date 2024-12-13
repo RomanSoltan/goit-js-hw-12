@@ -80,7 +80,10 @@ async function onLoadMore() {
     if (page >= data.totalHits / 15) {
       hideLoadMoreBtn();
       showMessage("We're sorry, but you've reached the end of search results.");
+      return;
     }
+
+    showLoadMoreBtn();
 
     const card = document.querySelector('.gallery-item');
     const cardHeight = card.getBoundingClientRect().height;
@@ -93,7 +96,6 @@ async function onLoadMore() {
     showErr(error.message);
   } finally {
     loadMoreBtn.disabled = false;
-    showLoadMoreBtn();
     loaderAnimation('none');
   }
 }
